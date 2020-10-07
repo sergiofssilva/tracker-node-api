@@ -1,0 +1,32 @@
+version: "3"
+services: 
+  mysql:
+    container_name: mysql
+    image: mysql:5.6
+    ports:
+        - "3306:3306"
+    env_file: .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$ROOT_PASSWORD
+      - MYSQL_DATABASE=$MYSQL_DATABASE 
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    command: mysqld --explicit_defaults_for_timestamp
+  api:
+    container_name: api-container
+    build: .
+    env_file: .env
+    image: tracker-node-api
+    restart: always
+    command: npm run debug:$NODE_ENV
+    volumes: 
+      - ./dist:/usr/src/tracker-node-api/dist
+      - ./package.json:/usr/src/tracker-node-api/package.json
+      - ./.env.dev:/usr/src/tracker-node-api/.env.dev
+      - ./.env.prod:/usr/src/tracker-node-api/.env.prod
+    ports: 
+      - "5050:5050"
+      - "9222:9222"
+    links: 
+      - mysql
+  
